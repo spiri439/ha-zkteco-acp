@@ -26,17 +26,17 @@ For a 2-door panel you get:
 - Cancel alarms
 - Restart panel
 
-**Locks** (one per door — the padlock visual)
-- Door 1 / 2 lock — **lock** = secure, **unlock** = hold open (normally-open),
-  **open** = momentary buzz-in. The locked/unlocked **state is read from the door
-  reed contact** (closed = locked, open = unlocked), so it's correct after a
-  restart. Shows `unknown` until a reed is wired and `DoorNSensorType` is set.
+**Controls**
+- **Open door 1 / 2** (button) — disarms/releases the lock momentarily (grant entry)
+- **Door 1 / 2 hold open** (switch) — normally-open (held released)
+- Aux output 1 / 2 (switch) — relay on/off
 
-**Switches**
-- Aux output 1 / 2 — relay on/off
-
-**Binary sensors**
-- Door 1 / 2 (the magnetic/reed contact — open/closed; needs a wired door sensor)
+**Binary sensors (status)**
+- **Door 1 / 2 lock** (`lock` class) — locked/armed vs unlocked/released (the relay).
+  Derived from open pulses + hold-open + door-open events; defaults to **locked**,
+  so it is never `unknown` (incl. after a restart).
+- **Door 1 / 2** (`door` class) — open/closed from the **reed/magnetic contact**.
+  Needs a wired reed and `DoorNSensorType` set; otherwise `unknown`.
 - Door 1 / 2 alarm (forced open / open-too-long…)
 - Aux input 1 / 2
 - Connectivity
@@ -166,15 +166,17 @@ YAML mode.
 - Wrong library was the original red herring: `pyzk` connects the TCP socket but
   the panel never replies, because it isn't the attendance protocol.
 
-## Two visuals per door
+## Two statuses per door (+ one action)
 
-Each physical door is a *lock relay* **and** a *reed/magnetic contact*. They show
-as two entities:
+Each physical door has two independent **statuses** and one **action**:
 
-- **`lock.…door_1_lock`** — padlock icon: locked / unlocked (relay)
-- **`binary_sensor.…door_1`** — door icon: closed / open (magnetic contact)
+- **Open door** (button) — the action: disarms/releases the lock.
+- **`binary_sensor.…door_1_lock`** — lock icon: armed (locked) / released (unlocked).
+- **`binary_sensor.…door_1`** — door icon: closed / open (reed/magnetic contact).
 
-The example dashboard places them side by side as tiles.
+They're independent on purpose: a door can be *closed* (reed) yet *unlocked*
+(during hold-open). The example dashboard shows the two status tiles side by side
+with the open/hold controls underneath.
 
 ## Brand icon
 
@@ -190,8 +192,11 @@ icon — the integration works regardless.
 
 ## Limitations / ideas
 
-- The lock's **state** follows the door reed contact, not the relay (the panel
-  doesn't report relay / normal-open state). With no reed wired it reads `unknown`.
+- The lock **status** is derived (the panel doesn't report the relay), so it tracks
+  HA-issued opens, hold-open and door-open events — not changes made entirely
+  outside HA. It defaults to locked, so it's never `unknown`.
+- The reed (door open/closed) reads `unknown` until a contact is wired and
+  `DoorNSensorType` is set on the panel.
 - User/card management (enrolling cards, time zones) is not implemented yet — the
   `zkaccess-c3` library exposes `get_device_data` / data tables that a future
   version could use.

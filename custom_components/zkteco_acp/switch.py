@@ -1,15 +1,12 @@
-"""Switches for the ZKTeco ACP integration: auxiliary output relays.
-
-Door hold-open is handled by the door ``lock`` entities (unlock == hold open),
-so it is intentionally not duplicated here.
-"""
+"""Switches for the ZKTeco ACP integration: aux output relays and door hold-open."""
 
 from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.switch import SwitchEntity
+from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -23,12 +20,15 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up aux-output switches."""
+    """Set up aux-output and door hold-open switches."""
     coordinator: ZKAccessCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities(
+    entities: list[SwitchEntity] = [
         ZKAccessAuxOutput(coordinator, aux)
         for aux in range(1, coordinator.info.nr_aux_out + 1)
-    )
+    ]
+    for door in range(1, coordinator.info.nr_of_locks + 1):
+        entities.append(ZKAccessDoorHoldOpen(coordinator, door))
+    async_add_entities(entities)
 
 
 class ZKAccessAuxOutput(ZKAccessEntity, SwitchEntity):
@@ -51,3 +51,31 @@ class ZKAccessAuxOutput(ZKAccessEntity, SwitchEntity):
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         await self.coordinator.async_set_aux_output(self._aux, False)
+
+
+class ZKAccessDoorHoldOpen(ZKAccessEntity, SwitchEntity):
+    """Hold a door in the normally-open (released) state.
+
+    Drives the panel's normally-open command. State is tracked by the coordinator
+    (the panel does not report it back).
+    """
+
+    _attr_translation_key = "door_hold_open"
+    _attr_device_class = SwitchDeviceClass.SWITCH
+    _attr_icon = "mdi:door-sliding-open"
+    _attr_entity_category = EntityCategory.CONFIG
+
+    def __init__(self, coordinator: ZKAccessCoordinator, door: int) -> None:
+        super().__init__(coordinator, f"door_{door}_hold_open")
+        self._door = door
+        self._attr_translation_placeholders = {"door": str(door)}
+
+    @property
+    def is_on(self) -> bool:
+        return self.coordinator.door_hold(self._door)
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self.coordinator.async_set_normal_open(self._door, True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self.coordinator.async_set_normal_open(self._door, False)

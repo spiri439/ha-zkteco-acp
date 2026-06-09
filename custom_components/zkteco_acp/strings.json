@@ -35,6 +35,7 @@
   "entity": {
     "binary_sensor": {
       "connectivity": { "name": "Connectivity" },
+      "door_lock": { "name": "Door {door} lock" },
       "door": { "name": "Door {door}" },
       "door_alarm": { "name": "Door {door} alarm" },
       "aux_input": { "name": "Aux input {aux}" }
@@ -46,10 +47,8 @@
       "sync_time": { "name": "Sync time" }
     },
     "switch": {
-      "aux_output": { "name": "Aux output {aux}" }
-    },
-    "lock": {
-      "lock": { "name": "Door {door} lock" }
+      "aux_output": { "name": "Aux output {aux}" },
+      "door_hold_open": { "name": "Door {door} hold open" }
     },
     "sensor": {
       "last_event_type": { "name": "Last event" },

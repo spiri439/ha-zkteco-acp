@@ -26,6 +26,7 @@ async def async_setup_entry(
 
     entities: list[BinarySensorEntity] = [ZKAccessConnectivity(coordinator)]
     for door in range(1, info.nr_of_locks + 1):
+        entities.append(ZKAccessLockStatus(coordinator, door))
         entities.append(ZKAccessDoorSensor(coordinator, door))
         entities.append(ZKAccessDoorAlarm(coordinator, door))
     for aux in range(1, info.nr_aux_in + 1):
@@ -52,8 +53,29 @@ class ZKAccessConnectivity(ZKAccessEntity, BinarySensorEntity):
         return True
 
 
+class ZKAccessLockStatus(ZKAccessEntity, BinarySensorEntity):
+    """Lock status (relay): on = unlocked/released, off = locked/armed.
+
+    Derived from hold-open state and momentary relay pulses (the panel does not
+    report the relay back). Defaults to locked, so it is never 'unknown'.
+    """
+
+    _attr_device_class = BinarySensorDeviceClass.LOCK
+    _attr_translation_key = "door_lock"
+
+    def __init__(self, coordinator: ZKAccessCoordinator, door: int) -> None:
+        super().__init__(coordinator, f"door_{door}_lock")
+        self._door = door
+        self._attr_translation_placeholders = {"door": str(door)}
+
+    @property
+    def is_on(self) -> bool:
+        # device_class LOCK: on == unlocked. locks[door]: True == released.
+        return bool(self.coordinator.data.locks.get(self._door, False))
+
+
 class ZKAccessDoorSensor(ZKAccessEntity, BinarySensorEntity):
-    """Physical door open/closed (requires a wired door sensor)."""
+    """Physical door open/closed (the reed/magnetic contact)."""
 
     _attr_device_class = BinarySensorDeviceClass.DOOR
     _attr_translation_key = "door"

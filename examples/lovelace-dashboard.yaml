@@ -14,24 +14,24 @@ views:
     path: doors
     icon: mdi:door-closed-lock
     cards:
-      # --- Door 1: two visuals side by side -> LOCKED state + CLOSED state ---
+      # --- Door 1: two STATUS tiles (lock + reed) and the open/hold controls ---
       - type: horizontal-stack
         cards:
           - type: tile
-            entity: lock.zkteco_acp_10_10_0_62_door_1_lock
+            entity: binary_sensor.zkteco_acp_10_10_0_62_door_1_lock
             name: Door 1 lock
-            features:
-              - type: lock-commands   # lock / unlock / open buttons
           - type: tile
             entity: binary_sensor.zkteco_acp_10_10_0_62_door_1
-            name: Door 1 contact
+            name: Door 1 (reed)
             color: green
       - type: entities
         show_header_toggle: false
         entities:
           - entity: button.zkteco_acp_10_10_0_62_open_door_1
-            name: Buzz open (momentary)
-            icon: mdi:door-open
+            name: Open door (disarm)
+            icon: mdi:lock-open-variant
+          - entity: switch.zkteco_acp_10_10_0_62_door_1_hold_open
+            name: Hold open
           - entity: binary_sensor.zkteco_acp_10_10_0_62_door_1_alarm
             name: Door 1 alarm
 
@@ -39,20 +39,20 @@ views:
       - type: horizontal-stack
         cards:
           - type: tile
-            entity: lock.zkteco_acp_10_10_0_62_door_2_lock
+            entity: binary_sensor.zkteco_acp_10_10_0_62_door_2_lock
             name: Door 2 lock
-            features:
-              - type: lock-commands
           - type: tile
             entity: binary_sensor.zkteco_acp_10_10_0_62_door_2
-            name: Door 2 contact
+            name: Door 2 (reed)
             color: green
       - type: entities
         show_header_toggle: false
         entities:
           - entity: button.zkteco_acp_10_10_0_62_open_door_2
-            name: Buzz open (momentary)
-            icon: mdi:door-open
+            name: Open door (disarm)
+            icon: mdi:lock-open-variant
+          - entity: switch.zkteco_acp_10_10_0_62_door_2_hold_open
+            name: Hold open
           - entity: binary_sensor.zkteco_acp_10_10_0_62_door_2_alarm
             name: Door 2 alarm
 

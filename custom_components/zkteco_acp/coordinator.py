@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import threading
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any
@@ -31,6 +32,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from homeassistant.util import dt as dt_util
 
 from .const import (
+    CONF_OPEN_DURATION,
+    DEFAULT_OPEN_DURATION,
     DEFAULT_PORT,
     DEFAULT_SCAN_INTERVAL,
     DOMAIN,
@@ -38,6 +41,22 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+# Event types that mean the door relay was driven open (momentary release).
+LOCK_OPEN_EVENTS = {
+    getattr(consts.EventType, name)
+    for name in (
+        "NORMAL_PUNCH_OPEN",
+        "EXIT_BUTTON_OPEN",
+        "REMOTE_OPENING",
+        "PRESS_FINGER_OPEN",
+        "CARD_FP_OPEN",
+        "MULTI_CARD_OPEN",
+        "DOOR_OPEN_BY_SUPERUSER",
+        "EMERGENCY_PASS_OPEN",
+    )
+    if hasattr(consts.EventType, name)
+}
 
 
 @dataclass
@@ -62,6 +81,8 @@ class PanelData:
 
     # door_nr -> True(open)/False(closed)/None(unknown, e.g. no sensor)
     doors: dict[int, bool | None] = field(default_factory=dict)
+    # door_nr -> True(lock released/unlocked)/False(armed/locked)
+    locks: dict[int, bool] = field(default_factory=dict)
     door_alarms: dict[int, list[str]] = field(default_factory=dict)
     aux_in: dict[int, bool | None] = field(default_factory=dict)
     aux_out: dict[int, bool | None] = field(default_factory=dict)
@@ -101,11 +122,20 @@ class ZKAccessCoordinator(DataUpdateCoordinator[PanelData]):
             entry.data.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
         )
 
+        self._open_duration: int = entry.options.get(
+            CONF_OPEN_DURATION,
+            entry.data.get(CONF_OPEN_DURATION, DEFAULT_OPEN_DURATION),
+        )
+
         self._dev = C3(self.host, self.port)
         self._io_lock = threading.Lock()
         self.info = PanelInfo()
         # Persisted per-door alarm state (refreshed whenever a status record arrives).
         self._alarms: dict[int, list[str]] = {}
+        # Lock status tracking. The panel does not report the relay state, so we
+        # derive it: released while held open, or until a momentary pulse expires.
+        self._door_hold: dict[int, bool] = {}
+        self._door_release_until: dict[int, float] = {}
         # Heavier metadata (user count) is fetched roughly once a minute, not every poll.
         self._poll_count = 0
         self._meta_every = max(1, round(60 / max(1, scan_interval)))
@@ -154,11 +184,19 @@ class ZKAccessCoordinator(DataUpdateCoordinator[PanelData]):
                     event = self._event_to_dict(rec)
                     data.new_events.append(event)
                     data.last_event = event
+                    if rec.event_type in LOCK_OPEN_EVENTS and rec.port_nr:
+                        self._door_release_until[rec.port_nr] = (
+                            time.monotonic() + self._open_duration
+                        )
 
             # Cached status (updated by get_rt_log above).
+            now = time.monotonic()
             for door in range(1, self.info.nr_of_locks + 1):
                 data.doors[door] = _to_bool(self._dev.lock_status(door))
                 data.door_alarms[door] = list(self._alarms.get(door, []))
+                data.locks[door] = self._door_hold.get(door, False) or (
+                    now < self._door_release_until.get(door, 0.0)
+                )
             for aux in range(1, self.info.nr_aux_in + 1):
                 data.aux_in[aux] = _to_bool(self._dev.aux_in_status(aux))
             for aux in range(1, self.info.nr_aux_out + 1):
@@ -248,7 +286,13 @@ class ZKAccessCoordinator(DataUpdateCoordinator[PanelData]):
         # Refresh soon so entity state reflects the change.
         await self.async_request_refresh()
 
+    def door_hold(self, door_nr: int) -> bool:
+        """Whether door is currently held open (normally-open) by us."""
+        return self._door_hold.get(door_nr, False)
+
     async def async_open_door(self, door_nr: int, duration: int) -> None:
+        # Mark the relay released for the pulse window so the lock status reflects it.
+        self._door_release_until[door_nr] = time.monotonic() + duration
         await self.async_control(
             controldevice.ControlDeviceOutput(
                 door_nr, consts.ControlOutputAddress.DOOR_OUTPUT, duration
@@ -265,6 +309,7 @@ class ZKAccessCoordinator(DataUpdateCoordinator[PanelData]):
         )
 
     async def async_set_normal_open(self, door_nr: int, enable: bool) -> None:
+        self._door_hold[door_nr] = enable
         await self.async_control(
             controldevice.ControlDeviceNormalOpenStateEnable(door_nr, enable)
         )
