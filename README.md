@@ -1,5 +1,8 @@
 # ZKTeco Access Control Panel — Home Assistant integration
 
+[![Validate](https://github.com/spiri439/ha-zkteco-acp/actions/workflows/validate.yml/badge.svg)](https://github.com/spiri439/ha-zkteco-acp/actions/workflows/validate.yml)
+[![hacs](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+
 A custom Home Assistant integration for **ZKTeco access-control panels** of the
 **C3 / inBio / ACP / Atlas** family (e.g. **ACP-200**, C3-100/200/400). Built on
 the pure-Python [`zkaccess-c3`](https://github.com/vwout/zkaccess-c3-py) library,
@@ -128,6 +131,13 @@ python3 test_connection.py 10.10.0.62 4370
 
 If it prints the serial/firmware and (optionally) realtime events, the
 integration will work.
+
+## Dashboard
+
+A ready-made Lovelace dashboard (doors, controls, status, and a door-event
+logbook) is provided in [`examples/lovelace-dashboard.yaml`](examples/lovelace-dashboard.yaml).
+Adjust the `entity_id`s to match your device, then add it as a new dashboard in
+YAML mode.
 
 ## How it works / design notes
 

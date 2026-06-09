@@ -1,0 +1,99 @@
+# Example Lovelace dashboard for the ZKTeco Access Control Panel integration.
+#
+# Add this as a new dashboard (Settings -> Dashboards -> + Add, then edit in YAML
+# mode) or paste individual cards via "Add card -> Manual".
+#
+# IMPORTANT: entity_ids below assume the panel's device name resolved to
+# "ZKTeco ACP 10.10.0.62" (no device name reported), giving the
+# `..._10_10_0_62_...` prefix. Check Developer Tools -> States for your actual
+# entity_ids and adjust if you renamed the device or it reports a name.
+
+title: Access Control
+views:
+  - title: Doors
+    path: doors
+    icon: mdi:door-closed-lock
+    cards:
+      - type: entities
+        title: Door 1
+        show_header_toggle: false
+        entities:
+          - entity: button.zkteco_acp_10_10_0_62_open_door_1
+            name: Open
+            icon: mdi:door-open
+          - entity: binary_sensor.zkteco_acp_10_10_0_62_door_1
+            name: Door state
+          - entity: binary_sensor.zkteco_acp_10_10_0_62_door_1_alarm
+            name: Alarm
+          - entity: switch.zkteco_acp_10_10_0_62_door_1_hold_open
+            name: Hold open
+
+      - type: entities
+        title: Door 2
+        show_header_toggle: false
+        entities:
+          - entity: button.zkteco_acp_10_10_0_62_open_door_2
+            name: Open
+            icon: mdi:door-open
+          - entity: binary_sensor.zkteco_acp_10_10_0_62_door_2
+            name: Door state
+          - entity: binary_sensor.zkteco_acp_10_10_0_62_door_2_alarm
+            name: Alarm
+          - entity: switch.zkteco_acp_10_10_0_62_door_2_hold_open
+            name: Hold open
+
+      - type: glance
+        title: Aux outputs
+        entities:
+          - entity: switch.zkteco_acp_10_10_0_62_aux_output_1
+            name: Aux out 1
+          - entity: switch.zkteco_acp_10_10_0_62_aux_output_2
+            name: Aux out 2
+
+  - title: Status
+    path: status
+    icon: mdi:shield-check
+    cards:
+      - type: entities
+        title: Panel
+        entities:
+          - entity: binary_sensor.zkteco_acp_10_10_0_62_connectivity
+            name: Online
+          - entity: sensor.zkteco_acp_10_10_0_62_users
+            name: Enrolled users
+          - entity: binary_sensor.zkteco_acp_10_10_0_62_aux_input_1
+            name: Aux input 1
+          - entity: binary_sensor.zkteco_acp_10_10_0_62_aux_input_2
+            name: Aux input 2
+          - type: divider
+          - entity: button.zkteco_acp_10_10_0_62_sync_time
+            name: Sync time
+          - entity: button.zkteco_acp_10_10_0_62_cancel_alarms
+            name: Cancel alarms
+          - entity: button.zkteco_acp_10_10_0_62_restart_panel
+            name: Restart panel
+
+      - type: entities
+        title: Last access event
+        entities:
+          - entity: sensor.zkteco_acp_10_10_0_62_last_event
+            name: Event
+          - entity: sensor.zkteco_acp_10_10_0_62_last_event_card
+            name: Card
+          - entity: sensor.zkteco_acp_10_10_0_62_last_event_door
+            name: Door
+          - entity: sensor.zkteco_acp_10_10_0_62_last_event_time
+            name: Time
+
+  - title: Activity
+    path: activity
+    icon: mdi:history
+    cards:
+      - type: logbook
+        title: Door events
+        hours_to_show: 72
+        entities:
+          - event.door_1_access_event
+          - event.door_2_access_event
+          - binary_sensor.zkteco_acp_10_10_0_62_door_1
+          - binary_sensor.zkteco_acp_10_10_0_62_door_2
