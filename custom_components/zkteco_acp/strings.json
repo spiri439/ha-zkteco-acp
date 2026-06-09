@@ -46,8 +46,10 @@
       "sync_time": { "name": "Sync time" }
     },
     "switch": {
-      "aux_output": { "name": "Aux output {aux}" },
-      "door_hold_open": { "name": "Door {door} hold open" }
+      "aux_output": { "name": "Aux output {aux}" }
+    },
+    "lock": {
+      "lock": { "name": "Door {door} lock" }
     },
     "sensor": {
       "last_event_type": { "name": "Last event" },

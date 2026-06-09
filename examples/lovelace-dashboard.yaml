@@ -14,33 +14,47 @@ views:
     path: doors
     icon: mdi:door-closed-lock
     cards:
+      # --- Door 1: two visuals side by side -> LOCKED state + CLOSED state ---
+      - type: horizontal-stack
+        cards:
+          - type: tile
+            entity: lock.zkteco_acp_10_10_0_62_door_1_lock
+            name: Door 1 lock
+            features:
+              - type: lock-commands   # lock / unlock / open buttons
+          - type: tile
+            entity: binary_sensor.zkteco_acp_10_10_0_62_door_1
+            name: Door 1 contact
+            color: green
       - type: entities
-        title: Door 1
         show_header_toggle: false
         entities:
           - entity: button.zkteco_acp_10_10_0_62_open_door_1
-            name: Open
+            name: Buzz open (momentary)
             icon: mdi:door-open
-          - entity: binary_sensor.zkteco_acp_10_10_0_62_door_1
-            name: Door state
           - entity: binary_sensor.zkteco_acp_10_10_0_62_door_1_alarm
-            name: Alarm
-          - entity: switch.zkteco_acp_10_10_0_62_door_1_hold_open
-            name: Hold open
+            name: Door 1 alarm
 
+      # --- Door 2 ---
+      - type: horizontal-stack
+        cards:
+          - type: tile
+            entity: lock.zkteco_acp_10_10_0_62_door_2_lock
+            name: Door 2 lock
+            features:
+              - type: lock-commands
+          - type: tile
+            entity: binary_sensor.zkteco_acp_10_10_0_62_door_2
+            name: Door 2 contact
+            color: green
       - type: entities
-        title: Door 2
         show_header_toggle: false
         entities:
           - entity: button.zkteco_acp_10_10_0_62_open_door_2
-            name: Open
+            name: Buzz open (momentary)
             icon: mdi:door-open
-          - entity: binary_sensor.zkteco_acp_10_10_0_62_door_2
-            name: Door state
           - entity: binary_sensor.zkteco_acp_10_10_0_62_door_2_alarm
-            name: Alarm
-          - entity: switch.zkteco_acp_10_10_0_62_door_2_hold_open
-            name: Hold open
+            name: Door 2 alarm
 
       - type: glance
         title: Aux outputs

@@ -24,12 +24,16 @@ For a 2-door panel you get:
 - Cancel alarms
 - Restart panel
 
+**Locks** (one per door — the padlock visual)
+- Door 1 / 2 lock — **lock** = secure, **unlock** = hold open (normally-open),
+  **open** = momentary buzz-in. State is optimistic (panel doesn't report the
+  relay back).
+
 **Switches**
 - Aux output 1 / 2 — relay on/off
-- Door 1 / 2 hold open — "normally open" mode (optimistic; panel doesn't report it back)
 
 **Binary sensors**
-- Door 1 / 2 (open/closed — needs a wired door sensor)
+- Door 1 / 2 (the magnetic/reed contact — open/closed; needs a wired door sensor)
 - Door 1 / 2 alarm (forced open / open-too-long…)
 - Aux input 1 / 2
 - Connectivity
@@ -159,9 +163,19 @@ YAML mode.
 - Wrong library was the original red herring: `pyzk` connects the TCP socket but
   the panel never replies, because it isn't the attendance protocol.
 
+## Two visuals per door
+
+Each physical door is a *lock relay* **and** a *reed/magnetic contact*. They show
+as two entities:
+
+- **`lock.…door_1_lock`** — padlock icon: locked / unlocked (relay)
+- **`binary_sensor.…door_1`** — door icon: closed / open (magnetic contact)
+
+The example dashboard places them side by side as tiles.
+
 ## Limitations / ideas
 
-- "Hold open" switches are optimistic (the panel doesn't report normal-open state).
+- Lock state is optimistic (the panel doesn't report relay / normal-open state back).
 - User/card management (enrolling cards, time zones) is not implemented yet — the
   `zkaccess-c3` library exposes `get_device_data` / data tables that a future
   version could use.
