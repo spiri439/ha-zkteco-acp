@@ -28,8 +28,9 @@ For a 2-door panel you get:
 
 **Locks** (one per door — the padlock visual)
 - Door 1 / 2 lock — **lock** = secure, **unlock** = hold open (normally-open),
-  **open** = momentary buzz-in. State is optimistic (panel doesn't report the
-  relay back).
+  **open** = momentary buzz-in. The locked/unlocked **state is read from the door
+  reed contact** (closed = locked, open = unlocked), so it's correct after a
+  restart. Shows `unknown` until a reed is wired and `DoorNSensorType` is set.
 
 **Switches**
 - Aux output 1 / 2 — relay on/off
@@ -189,7 +190,8 @@ icon — the integration works regardless.
 
 ## Limitations / ideas
 
-- Lock state is optimistic (the panel doesn't report relay / normal-open state back).
+- The lock's **state** follows the door reed contact, not the relay (the panel
+  doesn't report relay / normal-open state). With no reed wired it reads `unknown`.
 - User/card management (enrolling cards, time zones) is not implemented yet — the
   `zkaccess-c3` library exposes `get_device_data` / data tables that a future
   version could use.

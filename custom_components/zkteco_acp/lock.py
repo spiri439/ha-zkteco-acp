@@ -6,8 +6,12 @@ Gives a padlock visual per door. Mapping to the panel's real capabilities:
   * **unlock** -> enable normally-open (hold the door released)
   * **open**   -> momentary relay pulse to grant a single entry
 
-The panel does not report the relay state back, so the locked/unlocked state is
-optimistic (consistent with the command we last sent).
+State is derived from the **door reed/magnetic contact** (the door sensor the
+panel reports in every realtime status record): door closed -> locked, door open
+-> unlocked. This is a real, live signal, so it is correct after a Home Assistant
+restart (unlike an optimistic guess). It reads ``unknown`` until a reed contact is
+wired and the door's sensor type (``DoorNSensorType``) is set to NO/NC on the
+panel.
 """
 
 from __future__ import annotations
@@ -47,7 +51,6 @@ class ZKAccessDoorLock(ZKAccessEntity, LockEntity):
         super().__init__(coordinator, f"door_{door}_lock")
         self._door = door
         self._attr_translation_placeholders = {"door": str(door)}
-        self._attr_is_locked = True
 
     @property
     def _duration(self) -> int:
@@ -57,20 +60,21 @@ class ZKAccessDoorLock(ZKAccessEntity, LockEntity):
         )
 
     @property
-    def is_locked(self) -> bool:
-        return bool(self._attr_is_locked)
+    def is_locked(self) -> bool | None:
+        # Derived from the reed contact: door closed -> locked, open -> unlocked,
+        # no signal -> unknown. doors[n]: True=open, False=closed, None=unknown.
+        door_open = self.coordinator.data.doors.get(self._door)
+        if door_open is None:
+            return None
+        return not door_open
 
     async def async_lock(self, **kwargs: Any) -> None:
         """Secure the door (disable normally-open)."""
         await self.coordinator.async_set_normal_open(self._door, False)
-        self._attr_is_locked = True
-        self.async_write_ha_state()
 
     async def async_unlock(self, **kwargs: Any) -> None:
         """Hold the door released (enable normally-open)."""
         await self.coordinator.async_set_normal_open(self._door, True)
-        self._attr_is_locked = False
-        self.async_write_ha_state()
 
     async def async_open(self, **kwargs: Any) -> None:
         """Momentarily release the lock to grant a single entry."""
