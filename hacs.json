@@ -1,0 +1,6 @@
+{
+  "name": "ZKTeco Access Control Panel (C3 / inBio / ACP)",
+  "content_in_root": false,
+  "render_readme": true,
+  "homeassistant": "2024.1.0"
+}

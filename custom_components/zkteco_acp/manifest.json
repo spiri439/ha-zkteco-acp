@@ -1,0 +1,13 @@
+{
+  "domain": "zkteco_acp",
+  "name": "ZKTeco Access Control Panel (C3 / inBio / ACP)",
+  "version": "0.1.0",
+  "documentation": "https://github.com/spiri439/ha-zkteco-acp",
+  "issue_tracker": "https://github.com/spiri439/ha-zkteco-acp/issues",
+  "codeowners": ["@spiri439"],
+  "config_flow": true,
+  "dependencies": [],
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "requirements": ["zkaccess-c3==0.0.15"]
+}

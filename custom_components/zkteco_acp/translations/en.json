@@ -1,0 +1,63 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add ZKTeco access control panel",
+        "description": "Connection details for your ZKTeco C3 / inBio / ACP panel. The communication password is usually empty.",
+        "data": {
+          "host": "IP address",
+          "port": "Port",
+          "password": "Communication password (leave empty if none)",
+          "scan_interval": "Polling interval (seconds)",
+          "open_duration": "Door open duration (seconds)"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the panel. Check the IP/port and that this is a C3-family access panel.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "This panel is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "ZKTeco ACP options",
+        "data": {
+          "scan_interval": "Polling interval (seconds)",
+          "open_duration": "Door open duration (seconds)"
+        }
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "connectivity": { "name": "Connectivity" },
+      "door": { "name": "Door {door}" },
+      "door_alarm": { "name": "Door {door} alarm" },
+      "aux_input": { "name": "Aux input {aux}" }
+    },
+    "button": {
+      "open_door": { "name": "Open door {door}" },
+      "cancel_alarms": { "name": "Cancel alarms" },
+      "restart": { "name": "Restart panel" },
+      "sync_time": { "name": "Sync time" }
+    },
+    "switch": {
+      "aux_output": { "name": "Aux output {aux}" },
+      "door_hold_open": { "name": "Door {door} hold open" }
+    },
+    "sensor": {
+      "last_event_type": { "name": "Last event" },
+      "last_event_card": { "name": "Last event card" },
+      "last_event_door": { "name": "Last event door" },
+      "last_event_time": { "name": "Last event time" },
+      "users": { "name": "Users" }
+    },
+    "event": {
+      "door_event": { "name": "Door {door} access event" }
+    }
+  }
+}

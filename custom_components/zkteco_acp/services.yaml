@@ -1,0 +1,168 @@
+open_door:
+  name: Open door
+  description: Momentarily release a door lock to grant entry.
+  fields:
+    device_id:
+      name: Panel
+      description: The ZKTeco access control panel.
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+    door:
+      name: Door number
+      description: Door / lock number to open.
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 4
+          mode: box
+    duration:
+      name: Duration (s)
+      description: How long the relay stays released.
+      required: false
+      default: 5
+      selector:
+        number:
+          min: 1
+          max: 254
+          unit_of_measurement: s
+          mode: box
+
+set_aux_output:
+  name: Set auxiliary output
+  description: Switch an auxiliary output relay on or off.
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+    aux:
+      name: Aux output number
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 4
+          mode: box
+    state:
+      name: On
+      required: true
+      selector:
+        boolean:
+
+set_normally_open:
+  name: Set door normally-open
+  description: Enable or disable the normally-open (held unlocked) state for a door.
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+    door:
+      name: Door number
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 1
+          max: 4
+          mode: box
+    enable:
+      name: Enable
+      required: true
+      selector:
+        boolean:
+
+cancel_alarms:
+  name: Cancel alarms
+  description: Clear active alarms on the panel.
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+
+restart:
+  name: Restart panel
+  description: Reboot the access control panel.
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+
+sync_datetime:
+  name: Sync date/time
+  description: Set the panel clock to Home Assistant's current time.
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+
+get_users:
+  name: Get users
+  description: Return the user/card table from the panel (service response).
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+
+get_data:
+  name: Get data table
+  description: Read a raw data table (e.g. user, transaction, timezone, holiday).
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+    table:
+      name: Table name
+      required: true
+      example: user
+      selector:
+        text:
+    fields:
+      name: Fields
+      description: Optional subset of columns to return.
+      required: false
+      selector:
+        text:
+          multiple: true
+
+get_params:
+  name: Get device parameters
+  description: Read device parameters by name (service response).
+  fields:
+    device_id:
+      name: Panel
+      required: true
+      selector:
+        device:
+          integration: zkteco_acp
+    params:
+      name: Parameters
+      required: true
+      example: '["IPAddress", "NetMask"]'
+      selector:
+        text:
+          multiple: true
