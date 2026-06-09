@@ -51,7 +51,7 @@ set_aux_output:
           max: 4
           mode: box
     state:
-      name: On
+      name: "On"
       required: true
       selector:
         boolean:

@@ -23,3 +23,6 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
+          # Brand assets require submitting to home-assistant/brands; not applicable
+          # to a custom (non-default) repository.
+          ignore: brands
